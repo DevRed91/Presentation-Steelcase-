@@ -57,9 +57,9 @@
         // Add a camera to the scene and attach it to the canvas
         var camera = new BABYLON.ArcRotateCamera("Camera", Math.PI / 2, -Math.PI / 2, 100, BABYLON.Vector3(1,0,1), scene);
             camera.attachControl(canvas, true);
-            // camera.setPosition(new BABYLON.Vector3(-5 ,15, -5));
-            camera.lowerRadiusLimit = 5;
-            camera.upperRadiusLimit = 5;
+            camera.setPosition(new BABYLON.Vector3(4 ,6, -4));
+            camera.lowerRadiusLimit = 6;
+            camera.upperRadiusLimit = 6;
             camera.useFramingBehavior = true;
 
         //adding lights
@@ -155,6 +155,11 @@
             });
         }
         
+        //collab spaces
+        var collabGround;
+        //ground material
+        var collabGroundMat = new BABYLON.StandardMaterial("ground material", scene);
+            meshColor(collabGroundMat, "#FF0000", 0);
 
         //office model
         var wall, wall2, floor, glassWall1, glassWall2, glassWall3;
@@ -173,6 +178,7 @@
         
         //desk properties
         var desk1, desk2;
+        var chair1, chair2;
 
         BABYLON.SceneLoader.ImportMesh(null,"./","gltf/Steelcase/workspace.glb",scene,function (plan) {
             floor = plan[0].getChildMeshes()[1];
@@ -181,6 +187,13 @@
             glassWall1 = plan[0].getChildMeshes()[0];
             glassWall1.material = glassMaterialExt;
 
+        });
+
+        BABYLON.SceneLoader.ImportMesh(null,"./","gltf/Steelcase/Collab/Collab.glb",scene,function (collab) {
+            collabGround = collab[0].getChildMeshes()[0];
+            collabGround.material = collabGroundMat;
+            // click to show mesh
+            clickToShow(collabGround);
         });
 
         //table top material
@@ -197,16 +210,86 @@
         });
 
         //chair material
-        var chair;
         var chairMaterial = new BABYLON.StandardMaterial("chair material", scene);
             meshColor(chairMaterial, "#808080", 1);
         
         //importing chairs in part
-        BABYLON.SceneLoader.ImportMesh(null,"./","gltf/Steelcase/chair2.glb",scene,function (chair) {
+        BABYLON.SceneLoader.ImportMesh(null,"./","gltf/Steelcase/chair.glb",scene,function (chair) {
+            chair1 = chair[0].getChildMeshes()[0];
+            chair1.material = chairMaterial;
         });
 
-        BABYLON.SceneLoader.ImportMesh(null,"./","gltf/Steelcase/chair.glb",scene,function (chair) {
+        BABYLON.SceneLoader.ImportMesh(null,"./","gltf/Steelcase/chair1.glb",scene,function (chair) {
+            chair2 = chair[0].getChildMeshes()[0];
+            chair2.material = chairMaterial;
         });
+
+        BABYLON.SceneLoader.ImportMesh(null,"./","gltf/Steelcase/chair2.glb",scene,function (chair) {
+            chair3 = chair[0].getChildMeshes()[0];
+            chair3.material = chairMaterial;
+        });
+
+        BABYLON.SceneLoader.ImportMesh(null,"./","gltf/Steelcase/chair3.glb",scene,function (chair) {
+            chair4 = chair[0].getChildMeshes()[0];
+            chair4.material = chairMaterial;
+        });
+
+        BABYLON.SceneLoader.ImportMesh(null,"./","gltf/Steelcase/chair4.glb",scene,function (chair) {
+            chair5 = chair[0].getChildMeshes()[0];
+            chair5.material = chairMaterial;
+        });
+
+        BABYLON.SceneLoader.ImportMesh(null,"./","gltf/Steelcase/chair5.glb",scene,function (chair) {
+            chair6 = chair[0].getChildMeshes()[0];
+            chair6.material = chairMaterial;
+        });
+
+        BABYLON.SceneLoader.ImportMesh(null,"./","gltf/Steelcase/chair6.glb",scene,function (chair) {
+            chair7 = chair[0].getChildMeshes()[0];
+            chair7.material = chairMaterial;
+        });
+
+        BABYLON.SceneLoader.ImportMesh(null,"./","gltf/Steelcase/chair7.glb",scene,function (chair) {
+            chair8 = chair[0].getChildMeshes()[0];
+            chair8.material = chairMaterial;
+        });
+
+
+        // //design 1 elements
+        // var deskDesign1, chairDesign1, stoolDesign1; 
+
+        // //design 1 button
+        // var design1Button = BABYLON.GUI.Button.CreateSimpleButton("butDesign1", "Design 1");
+            
+        //     buttonPropText(design1Button, "42%", "-5%");
+        //     //color change on hover
+        //     buttonColorChange(design1Button);
+
+        //     var clicks = 0;
+        //     design1Button.onPointerClickObservable.add(function(){
+        //         clicks++;
+                
+        //         if (clicks){
+        //             BABYLON.SceneLoader.ImportMesh(null,"./","gltf/Steelcase/design1/desk.glb",scene,function (desk) {
+        //                 deskDesign1 = desk[0].getChildMeshes()[0];
+        //                 deskDesign1.material = tableTopMaterial;
+        //             });
+
+        //             BABYLON.SceneLoader.ImportMesh(null,"./","gltf/Steelcase/design1/chair.glb",scene,function (chair) {
+        //                 chairDesign1 = chair[0].getChildMeshes()[0];
+        //             });
+
+        //             //camera position
+        //             camera.attachControl(canvas, true);
+        //             camera.setPosition(new BABYLON.Vector3(2 ,3,-1));
+        //         //deleting meshes
+        //             desk1.dispose();
+        //             desk2.dispose();
+        //             meshColor(chairMaterial, "#808080", 0);
+        //     }
+        //     });
+
+        //     advancedTexture.addControl(design1Button);
 
         // Button for Plan
         var butPlan = BABYLON.GUI.Button.CreateSimpleButton("butPlan", "Top View");
