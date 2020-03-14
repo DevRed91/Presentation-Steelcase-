@@ -287,7 +287,7 @@
             meshColor(collabGroundMat, "#FF0000", 1);
 
         //design 2
-        BABYLON.SceneLoader.ImportMesh(null,"./","gltf/steelcase/design1/combined .glb",scene,function (plan) {
+        BABYLON.SceneLoader.ImportMesh(null,"/","gltf/steelcase/design1/combined .glb",scene,function (plan) {
             });
         
         //Design 1
@@ -323,7 +323,7 @@
                     
                     //collabGround
                     collabGround.onPointerClickObservable.add(function(){
-                        BABYLON.SceneLoader.ImportMesh(null,"./","gltf/steelcase/Collab/Collab.glb",scene,function (mesh) {
+                        BABYLON.SceneLoader.ImportMesh(null,"/","gltf/steelcase/Collab/Collab.glb",scene,function (mesh) {
                             collab = mesh[0].getChildMeshes()[0];
                             collab.material = collabGroundMat;
                         });
