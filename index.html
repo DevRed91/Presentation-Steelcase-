@@ -24,6 +24,22 @@
         <script src="babylon.glTF2FileLoader.js"></script>
         <script src="babylon.js"></script>
 
+        <!-- <link rel="stylesheet" href="css/reset.css">
+		<link rel="stylesheet" href="css/reveal.css">
+        <link rel="stylesheet" href="css/theme/black.css">
+        
+        <!-- Theme used for syntax highlighting of code -->
+		<!-- <link rel="stylesheet" href="lib/css/monokai.css"> -->
+
+		<!-- Printing and PDF exports -->
+		<!-- <script>
+			var link = document.createElement( 'link' );
+			link.rel = 'stylesheet';
+			link.type = 'text/css';
+			link.href = window.location.search.match( /print-pdf/gi ) ? 'css/print/pdf.css' : 'css/print/paper.css';
+			document.getElementsByTagName( 'head' )[0].appendChild( link );
+		</script> --> -->
+
         <style>
             html, body {
                 overflow: hidden;
@@ -38,12 +54,22 @@
                 touch-action: none;
             }
 
+            #header{
+                color:black;
+                top: 20px;
+            }
+
         </style>
     </head>
 <body>
-    <canvas id="renderCanvas">
 
+    <canvas id="renderCanvas">
+        <section id = "header">
+            <h2>Layout of first design</h2>
+        </section>
     </canvas>
+    
+    <!-- <script src="js/reveal.js"></script> -->
 
     <script>
         var canvas = document.querySelector("#renderCanvas");
@@ -52,21 +78,37 @@
 
         // Create the scene space
         var scene = new BABYLON.Scene(engine);
-            scene.clearColor = new BABYLON.Color3.FromHexString("#e5e5e5");
+            scene.clearColor = new BABYLON.Color3.White();
 
         // Add a camera to the scene and attach it to the canvas
-        var camera = new BABYLON.ArcRotateCamera("Camera", Math.PI / 2, -Math.PI / 2, 100, BABYLON.Vector3(1,0,1), scene);
-            camera.attachControl(canvas, true);
-            camera.setPosition(new BABYLON.Vector3(4 ,6, -4));
-            camera.lowerRadiusLimit = 6;
-            camera.upperRadiusLimit = 6;
+        var camera = new BABYLON.ArcRotateCamera("Camera", Math.PI , -Math.PI , 100, BABYLON.Vector3(1,0,1), scene);
+            camera.setPosition(new BABYLON.Vector3(-5 ,5, -5));
+            
             camera.useFramingBehavior = true;
+            
 
         //adding lights
         var light1 = new BABYLON.HemisphericLight("light1", new BABYLON.Vector3(0, 100, 0), scene);
+            light1.diffuseColor = new BABYLON.Color3.White();
+        var light2 = new BABYLON.PointLight("light1", new BABYLON.Vector3(0, -10, 0), scene);
+            light2.diffuseColor = new BABYLON.Color3.White();
 
-        //Adding button to add walls
         var advancedTexture = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI");
+        //adding text               
+        var textBlock = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("text");
+        var textKey;
+        var text = function (text, topPos, leftPos, size){
+            textKey = new BABYLON.GUI.TextBlock();
+            textKey.color = "black";
+            textKey.fontSize = size;
+            textKey.top = topPos;
+            text.left = leftPos;
+            textKey.text = text;
+        }    
+        
+        text("click to zoom", "20%", "", 25);
+
+        textBlock.addControl(textKey);
 
         var selectedMesh;
 
@@ -123,6 +165,58 @@
             meshMat.alpha = num;
         }
 
+
+
+        //animation
+        //easing function
+        var easingFunction = function (){
+            var ease = new BABYLON.BezierCurveEase();
+            ease.setEasingMode(BABYLON.EasingFunction.EASINGMODE_EASEINOUT);
+            animationBox.setEasingFunction(ease);
+
+            camera.animations.push(animationCamera);
+
+            scene.beginAnimation(camera, 0 , 25, true);
+        };
+
+        //camera animation
+        var cameraAnimation = function (numX, numY, numZ){
+            animationCamera = new BABYLON.Animation(
+                "myAnimationCamera",
+                "position",
+                30,
+                BABYLON.Animation.ANIMATIONTYPE_VECTOR3,
+                BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT
+            );
+
+            var keys = [];
+                keys.push({
+                    frame:0,
+                    value: camera.position.clone(),
+                });
+
+                // keys.push({
+                //     frame:25,
+                //     value: new BABYLON.Vector3(0, 5, -5)
+                // });
+
+                keys.push({
+                    frame:50,
+                    value: new BABYLON.Vector3(numX, numY, numZ)
+                });
+
+            animationCamera.setKeys(keys);
+
+            camera.animations = [];
+            camera.animations.push(animationCamera);
+
+            scene.beginAnimation(camera, 0, 50, false, 1);
+            camera.lowerRadiusLimit = 1;
+            // camera.upperRadiusLimit = 1;
+
+            easingFunction();
+        };
+
         //button properties with image
         var buttonPropImage = function (button, left, top){
             button.width = "50px";
@@ -136,10 +230,20 @@
 
         //button properties with text
         var buttonPropText = function (button, left, top){
-            button.width = "90px";
+            button.width = "180px";
+            button.height = "40px";
+            button.color = "white";
+            button.background = "black";
+            button.left = left;
+            button.top = top;
+            button.cornerRadius = 5;
+        };
+        //transparent button
+        var buttonPropTrans = function (button, left, top){
+            button.width = "40px";
             button.height = "40px";
             button.color = "black";
-            button.background = "#e5e5e5";
+            button.background = "transparent";
             button.left = left;
             button.top = top;
             button.cornerRadius = 5;
@@ -148,181 +252,88 @@
         //button color change on hover
         var buttonColorChange = function (button){
             button.onPointerEnterObservable.add(function() {
-                button.background = "grey";
+                button.background = "#03A3FC";
             });
             button.onPointerOutObservable.add(function() {
-                button.background = "#e5e5e5";
+                button.background = "black";
             });
         }
-        
-        //collab spaces
-        var collabGround;
-        //ground material
-        var collabGroundMat = new BABYLON.StandardMaterial("ground material", scene);
-            meshColor(collabGroundMat, "#FF0000", 0);
 
-        //office model
-        var wall, wall2, floor, glassWall1, glassWall2, glassWall3;
-
-        //floor material
-        var floorMaterial = new BABYLON.StandardMaterial("floor material", scene);
-            meshColor(floorMaterial, "#FFFFFF", 1);
-
-        //wall material
-        var wallMaterial = new BABYLON.StandardMaterial("wall material", scene);
-            meshColor(wallMaterial, "#D4E6F1", 1);
-
-        //exterior glass wall material
-        var glassMaterialExt = new BABYLON.StandardMaterial("glass wall material", scene);
-            meshColor(glassMaterialExt, "#C0C0C0", 0.25);
-        
-        //desk properties
-        var desk1, desk2;
-        var chair1, chair2;
-
-        BABYLON.SceneLoader.ImportMesh(null,"./","gltf/Steelcase/workspace.glb",scene,function (plan) {
-            floor = plan[0].getChildMeshes()[1];
-            floor.material = floorMaterial;
-
-            glassWall1 = plan[0].getChildMeshes()[0];
-            glassWall1.material = glassMaterialExt;
-
-        });
-
-        BABYLON.SceneLoader.ImportMesh(null,"./","gltf/Steelcase/Collab/Collab.glb",scene,function (collab) {
-            collabGround = collab[0].getChildMeshes()[0];
-            collabGround.material = collabGroundMat;
-            // click to show mesh
-            clickToShow(collabGround);
-        });
-
-        //table top material
-        var tableTopMaterial = new BABYLON.StandardMaterial("tabel top material", scene);
-            meshColor(tableTopMaterial, "#FFE7C7", 1);
-        //import desk
-        BABYLON.SceneLoader.ImportMesh(null,"./","gltf/Steelcase/desk2.glb",scene,function (desk) {
-            desk1 = desk[0].getChildMeshes()[0];
-            desk1.material = tableTopMaterial;
-
-            desk2 = desk[0].getChildMeshes()[1];
-            desk2.material = tableTopMaterial;
-
-        });
-
-        //chair material
-        var chairMaterial = new BABYLON.StandardMaterial("chair material", scene);
-            meshColor(chairMaterial, "#808080", 1);
-        
-        //importing chairs in part
-        BABYLON.SceneLoader.ImportMesh(null,"./","gltf/Steelcase/chair.glb",scene,function (chair) {
-            chair1 = chair[0].getChildMeshes()[0];
-            chair1.material = chairMaterial;
-        });
-
-        BABYLON.SceneLoader.ImportMesh(null,"./","gltf/Steelcase/chair1.glb",scene,function (chair) {
-            chair2 = chair[0].getChildMeshes()[0];
-            chair2.material = chairMaterial;
-        });
-
-        BABYLON.SceneLoader.ImportMesh(null,"./","gltf/Steelcase/chair2.glb",scene,function (chair) {
-            chair3 = chair[0].getChildMeshes()[0];
-            chair3.material = chairMaterial;
-        });
-
-        BABYLON.SceneLoader.ImportMesh(null,"./","gltf/Steelcase/chair3.glb",scene,function (chair) {
-            chair4 = chair[0].getChildMeshes()[0];
-            chair4.material = chairMaterial;
-        });
-
-        BABYLON.SceneLoader.ImportMesh(null,"./","gltf/Steelcase/chair4.glb",scene,function (chair) {
-            chair5 = chair[0].getChildMeshes()[0];
-            chair5.material = chairMaterial;
-        });
-
-        BABYLON.SceneLoader.ImportMesh(null,"./","gltf/Steelcase/chair5.glb",scene,function (chair) {
-            chair6 = chair[0].getChildMeshes()[0];
-            chair6.material = chairMaterial;
-        });
-
-        BABYLON.SceneLoader.ImportMesh(null,"./","gltf/Steelcase/chair6.glb",scene,function (chair) {
-            chair7 = chair[0].getChildMeshes()[0];
-            chair7.material = chairMaterial;
-        });
-
-        BABYLON.SceneLoader.ImportMesh(null,"./","gltf/Steelcase/chair7.glb",scene,function (chair) {
-            chair8 = chair[0].getChildMeshes()[0];
-            chair8.material = chairMaterial;
-        });
-
-
-        // //design 1 elements
-        // var deskDesign1, chairDesign1, stoolDesign1; 
-
-        // //design 1 button
-        // var design1Button = BABYLON.GUI.Button.CreateSimpleButton("butDesign1", "Design 1");
-            
-        //     buttonPropText(design1Button, "42%", "-5%");
-        //     //color change on hover
-        //     buttonColorChange(design1Button);
-
-        //     var clicks = 0;
-        //     design1Button.onPointerClickObservable.add(function(){
-        //         clicks++;
+        //button color change on click
+        var buttonClickColor = function (button){
+            button.onPointerClickObservable.add(function() {
+                button.color = "blue";
                 
-        //         if (clicks){
-        //             BABYLON.SceneLoader.ImportMesh(null,"./","gltf/Steelcase/design1/desk.glb",scene,function (desk) {
-        //                 deskDesign1 = desk[0].getChildMeshes()[0];
-        //                 deskDesign1.material = tableTopMaterial;
-        //             });
-
-        //             BABYLON.SceneLoader.ImportMesh(null,"./","gltf/Steelcase/design1/chair.glb",scene,function (chair) {
-        //                 chairDesign1 = chair[0].getChildMeshes()[0];
-        //             });
-
-        //             //camera position
-        //             camera.attachControl(canvas, true);
-        //             camera.setPosition(new BABYLON.Vector3(2 ,3,-1));
-        //         //deleting meshes
-        //             desk1.dispose();
-        //             desk2.dispose();
-        //             meshColor(chairMaterial, "#808080", 0);
-        //     }
-        //     });
-
-        //     advancedTexture.addControl(design1Button);
-
-        // Button for Plan
-        var butPlan = BABYLON.GUI.Button.CreateSimpleButton("butPlan", "Top View");
-
-            buttonPropText(butPlan, "42%", "-40%");            
-            //color change on hover
-            buttonColorChange(butPlan);
-
-            var showPlan = 0;
-            butPlan.onPointerClickObservable.add(function(){
-                showPlan++;
-                if (showPlan){
-                    camera.setPosition(new BABYLON.Vector3(0,10,-1));
-                }
             });
-            advancedTexture.addControl(butPlan);
+            // button.onPointerOutObservable.add(function() {
+            //     button.background = "#e5e5e5";
+            // });
+        }
+        //ground material
+        var groundMat = new BABYLON.StandardMaterial("ground material", scene);
+            meshColor(groundMat, "#FFFFFF", 1);
 
-        //Button for isometric view
-        var butIso = BABYLON.GUI.Button.CreateSimpleButton("butIso", "Iso View");
+        //Ground
+        var ground = BABYLON.MeshBuilder.CreateGround("myGround", {width: 1000, height: 1000, subdivisions: 4}, scene);
+            ground.position = new BABYLON.Vector3(0,0,0);
+            ground.material = groundMat;
 
-            buttonPropText(butIso, "35%", "-40%");            
+        var clicks = 0;
+
+        var collab;
+
+        //collab color
+        var collabGroundMat = new BABYLON.StandardMaterial("Collab mat", scene);
+            meshColor(collabGroundMat, "#FF0000", 1);
+
+        //design 2
+        BABYLON.SceneLoader.ImportMesh(null,"./","gltf/Steelcase/design1/combined .glb",scene,function (plan) {
+            });
+        
+        //Design 1
+        var firstLayout = BABYLON.GUI.Button.CreateSimpleButton("firstDesign", "First Layout");
+
+            buttonPropText(firstLayout, "-40%", "0%");
             //color change on hover
-            buttonColorChange(butIso);
+            buttonColorChange(firstLayout);
+            //option buttons
+            var collabGround = BABYLON.GUI.Button.CreateImageWithCenterTextButton("collab spaces", " ", "icons/collab.png");
+                buttonPropTrans(collabGround, "-42%", "8%");
+                // buttonColorChange(collabGround);
+            
+            var focusedSpace = BABYLON.GUI.Button.CreateImageWithCenterTextButton("butWork", " ", "https://cdn.onlinewebfonts.com/svg/img_506916.png");
+                buttonPropTrans(focusedSpace, "-38%", "8%");
+                // buttonColorChange(focusedSpace);
 
-            var showIso = 0;
-            butIso.onPointerClickObservable.add(function(){
-                showIso++;
-                if (showIso % 1 == 0){
-                    camera.setPosition(new BABYLON.Vector3(-2 ,2,-2));
+            firstLayout.onPointerClickObservable.add(function(){
+                clicks++;
+                if (clicks){
+                    camera.attachControl(canvas, true);
+                    // camera.lowerRadiusLimit = 1;
+                    scene.activeCamera.panningSensibility = 0;
+                    camera.applyGravity = true;
+                    buttonClickColor(firstLayout)
+                    //remove text and button
+                    textBlock.removeControl(textKey);                   
+                    //add options
+                    advancedTexture.addControl(collabGround);
+                    advancedTexture.addControl(focusedSpace);
+
+                    cameraAnimation(1,2,-1);
+                    
+                    //collabGround
+                    collabGround.onPointerClickObservable.add(function(){
+                        BABYLON.SceneLoader.ImportMesh(null,"./","gltf/Steelcase/Collab/Collab.glb",scene,function (mesh) {
+                            collab = mesh[0].getChildMeshes()[0];
+                            collab.material = collabGroundMat;
+                        });
+
+                    });
                 }
+                
             });
 
-            advancedTexture.addControl(butIso);
+            advancedTexture.addControl(firstLayout);
 
         //DOM event
         canvas.addEventListener("click", function(e) {
@@ -359,5 +370,6 @@
             });
 
     </script>
+
 </body>
 </html>
