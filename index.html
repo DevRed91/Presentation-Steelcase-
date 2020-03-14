@@ -323,7 +323,7 @@
                     
                     //collabGround
                     collabGround.onPointerClickObservable.add(function(){
-                        BABYLON.SceneLoader.ImportMesh(null,"./","gltf/Steelcase/collab/Collab.glb",scene,function (mesh) {
+                        BABYLON.SceneLoader.ImportMesh(null,"","/gltf/Steelcase/collab/Collab.glb",scene,function (mesh) {
                             collab = mesh[0].getChildMeshes()[0];
                             collab.material = collabGroundMat;
                         });
